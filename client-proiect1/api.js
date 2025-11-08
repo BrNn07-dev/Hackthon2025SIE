@@ -1,22 +1,33 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage'; 
 
-const API_URL = 'http://192.168.56.1'; 
+const API_URL = 'http://192.168.56.1:8000';
+
+const BASE_URL = 'http://192.168.56.1:8000'; 
 
 export const register = async (username, password, email, nume, prenume, telefon) => {
-  try {
-    const response = await axios.post(`${API_URL}/register`, {
-      username: username,
-      password: password,
-      email: email,
-      nume: nume,
-      prenume: prenume,
-      telefon: telefon
-    });
-    return response.data;
-  } catch (error) {
-    throw error.response.data;
+  const response = await fetch(`${BASE_URL}/register`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      username,
+      password,
+      email,
+      nume,
+      prenume,
+      telefon,
+    }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw data; 
   }
+
+  return data; 
 };
 
 export const login = async (username, password) => {
@@ -30,11 +41,9 @@ export const login = async (username, password) => {
     });
     
     const accessToken = response.data.access_token;
-    
-    // Salvăm token-ul local
+
     await AsyncStorage.setItem('userToken', accessToken);
     
-    // Setăm header-ul default pentru TOATE cererile viitoare
     axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
     
     return response.data;
@@ -44,9 +53,7 @@ export const login = async (username, password) => {
 };
 
 export const logout = async () => {
-    // Ștergem token-ul local
     await AsyncStorage.removeItem('userToken');
-    // Ștergem header-ul default
     delete axios.defaults.headers.common['Authorization'];
 };
 
@@ -72,4 +79,4 @@ export const createTask = async (title, description) => {
   }
 };
 
-// Poți adăuga aici și funcții pentru updateTask, deleteTask etc.
+//funcții pentru updateTask, deleteTask etc.

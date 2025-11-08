@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Button, FlatList, TextInput } from 'react-native';
-// Importăm funcțiile din noul nostru fișier!
+
 import * as api from './api'; 
 
 export default function App() {
@@ -11,9 +11,9 @@ export default function App() {
 
   const handleLogin = async () => {
     try {
-      await api.login(username, password); // Folosim funcția din api.js
+      await api.login(username, password); 
       setIsLoggedIn(true);
-      fetchTasks(); // Încarcă task-urile după login
+      fetchTasks(); 
     } catch (error) {
       console.error("Eroare la login:", error.detail);
       alert(error.detail);
@@ -22,15 +22,14 @@ export default function App() {
 
   const fetchTasks = async () => {
     try {
-      const data = await api.getTasks(); // Folosim funcția din api.js
+      const data = await api.getTasks(); 
       setTasks(data);
     } catch (error) {
       console.error("Eroare la aducerea task-urilor:", error.detail);
-      // Probabil token-ul a expirat, ar trebui să dăm logout
+     
     }
   };
 
-  // ... Aici pui UI-ul (JSX) ...
   
   if (!isLoggedIn) {
     return (
@@ -38,11 +37,10 @@ export default function App() {
         <TextInput placeholder="Username" onChangeText={setUsername} value={username} />
         <TextInput placeholder="Password" onChangeText={setPassword} value={password} secureTextEntry />
         <Button title="Login" onPress={handleLogin} />
-        {/* Poți adăuga și un formular de înregistrare */}
+       
       </View>
     );
   }
-
   return (
     <View>
       <Text>Bine ai venit!</Text>
@@ -52,7 +50,6 @@ export default function App() {
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => <Text>{item.title}</Text>}
       />
-      {/* Poți adăuga un formular pentru a crea task-uri noi */}
     </View>
   );
 }
