@@ -17,14 +17,27 @@ def get_db():
     finally:
         db.close()
 
+
 @app.post("/register", response_model=models.User)
 def register_user(user: models.UserCreate, db: Session = Depends(get_db)):
-    db_user = security.get_user(db, username=user.username)
-    if db_user:
+
+    db_user_by_username = security.get_user(db, username=user.username)
+    if db_user_by_username:
         raise HTTPException(status_code=400, detail="Username already registered")
     
+    db_user_by_email = db.query(models.UserDB).filter(models.UserDB.email == user.email).first()
+    if db_user_by_email:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
     hashed_password = security.get_password_hash(user.password)
-    new_user = models.UserDB(username=user.username, hashed_password=hashed_password)
+    new_user = models.UserDB(
+        username=user.username,
+        hashed_password=hashed_password,
+        email=user.email,
+        nume=user.nume,
+        prenume=user.prenume,
+        telefon=user.telefon
+    )
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
@@ -102,7 +115,6 @@ def get_single_task(
         
     return task
 
-#Rute pentru Update și Delet
 
 @app.put("/tasks/{task_id}", response_model=models.Task)
 def update_task(

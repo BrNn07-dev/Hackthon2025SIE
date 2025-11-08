@@ -11,6 +11,12 @@ class UserDB(Base):
     name = Column(String, unique=True, index=True)
     password = Column(String)
 
+    email = Column(String, unique=True, index=True) 
+    nume = Column(String)
+    prenume = Column(String)
+    telefon = Column(String, nullable=True) 
+
+
     tasks = relationship("TaskDB", back_populates = "owner")
 
 class TaskDB(Base):
@@ -20,7 +26,7 @@ class TaskDB(Base):
     title = Column(String, index=True)
     description = Column(String, nullable=True) 
     status = Column(String, default="in_progress")
-    id_owner = Column("UserDB", ForeignKey("user.id"))
+    id_owner = Column("UserDB", ForeignKey("users.id"))
     owner = relationship("UserDB", back_populates = "tasks")
 
 class TaskBase(BaseModel):

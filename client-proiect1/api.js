@@ -1,17 +1,17 @@
 import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage'; // Vei avea nevoie de asta!
+import AsyncStorage from '@react-native-async-storage/async-storage'; 
 
-// IMPORTANT: Înlocuiește cu IP-ul tău local!
-// Nu folosi 'localhost' sau '127.0.0.1'.
-const API_URL = 'http://192.168.56.1'; // Exemplu: 'http://192.168.1.10:8000'
+const API_URL = 'http://192.168.56.1'; 
 
-// --- SCENARIUL A: Autentificare ---
-
-export const register = async (username, password) => {
+export const register = async (username, password, email, nume, prenume, telefon) => {
   try {
     const response = await axios.post(`${API_URL}/register`, {
       username: username,
-      password: password
+      password: password,
+      email: email,
+      nume: nume,
+      prenume: prenume,
+      telefon: telefon
     });
     return response.data;
   } catch (error) {
