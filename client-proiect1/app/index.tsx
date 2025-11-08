@@ -1,120 +1,73 @@
-import React, { useState } from "react";
-import {
-  StyleSheet,
-  View,
-  Text,
-  TextInput,
-  Button,
-  FlatList,
-  Alert,
-  SafeAreaView,
-} from "react-native";
+import React from 'react';
+import { 
+  StyleSheet, 
+  View, 
+  Text, 
+  SafeAreaView, 
+  TouchableOpacity 
+} from 'react-native';
+import { useRouter } from 'expo-router';
 
-import * as api from "../api"; 
-import { Link } from "expo-router"; 
-
-interface Task {
-  id: number;
+interface StyledButtonProps {
   title: string;
-  description?: string; 
-  status: string;
-  owner_id: number;
+  onPress: () => void;
+  color: string;
+  textColor: string;
 }
 
-export default function LoginScreen() {
+const StyledButton: React.FC<StyledButtonProps> = ({ title, onPress, color, textColor }) => (
+  <TouchableOpacity
+    style={[styles.button, { backgroundColor: color }]}
+    onPress={onPress}
+  >
+    <Text style={[styles.buttonText, { color: textColor }]}>{title}</Text>
+  </TouchableOpacity>
+);
 
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+export default function HomeScreen() {
+  const router = useRouter();
 
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [tasks, setTasks] = useState<Task[]>([]);
-
-  const handleLogin = async () => {
-    if (!username || !password) {
-      Alert.alert("Eroare", "Completează username și parola");
-      return;
-    }
-    try {
-      await api.login(username, password);
-      setIsLoggedIn(true);
-      fetchTasks(); 
-    } catch (error) {
-      console.error(error);
-      Alert.alert("Eroare la login", "Username sau parolă incorectă");
-    }
+  const colors = {
+    background: '#0d2c4f', 
+    title: '#FFC300',      
+    button: '#FFC300',     
+    buttonText: '#0d2c4f'  
   };
-
-  const fetchTasks = async () => {
-    try {
-      const data = await api.getTasks();
-      setTasks(data);
-    } catch (error) {
-      console.error(error);
-      Alert.alert("Eroare", "Nu am putut aduce task-urile");
-    }
-  };
-
-  const handleLogout = () => {
-    api.logout();
-    setIsLoggedIn(false);
-    setTasks([]);
-    setUsername("");
-    setPassword("");
-  };
-
-  if (!isLoggedIn) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <Text style={styles.title}>Sistem de Autentificare</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Username"
-          value={username}
-          onChangeText={setUsername}
-          autoCapitalize="none"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
-        <View style={styles.buttonContainer}>
-          <Button title="Login" onPress={handleLogin} />
-        </View>
-
-        <Link href="/register" style={styles.link}>
-          Nu ai cont? Înregistraza-te
-        </Link>
-      </SafeAreaView>
-    );
-  }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Task-urile Mele</Text>
-
-      <FlatList
-        data={tasks}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <View style={styles.taskItem}>
-            <Text>{item.title}</Text>
-            {item.description && (
-              <Text style={styles.description}>{item.description}</Text>
-            )}
-          </View>
-        )}
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+      <Text style={[styles.title, { color: colors.title }]}>
+        Pagina Principală
+      </Text>
+      
+      <StyledButton
+        title="Login"
+        onPress={() => router.push('./login')}
+        color={colors.button}
+        textColor={colors.buttonText}
       />
 
-      <Button title="Reîncarcă Task-uri" onPress={fetchTasks} />
+      <StyledButton
+        title="Register"
+        onPress={() => router.push('/register')}
+        color={colors.button}
+        textColor={colors.buttonText}
+      />
 
-      <Link href="/create-group" style={styles.link}> 
-        Creează un grup nou
-      </Link>
+      
+      <StyledButton
+        title="Task-urile Mele"
+        onPress={() => router.push('./index1')}
+        color={colors.button}
+        textColor={colors.buttonText}
+      />
 
-      <Button title="Logout" onPress={handleLogout} color="red" />
+      <StyledButton
+        title="Creare Grupuri Utilizatori"
+        onPress={() => router.push('/create-group')}
+        color={colors.button}
+        textColor={colors.buttonText}
+      />
     </SafeAreaView>
   );
 }
@@ -123,50 +76,24 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center', 
     padding: 20,
-    backgroundColor: '#0d2c4f', 
   },
   title: {
-    fontSize: 32, 
+    fontSize: 28,
     fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom: 30, 
-    color: '#FFC300', 
+    marginBottom: 40,
   },
-  input: {
-    width: '35%', 
-    backgroundColor: 'white',
-    height: 40,
-    borderColor: '#ffc300ff', 
-    borderWidth: 1,
-    borderRadius: 8, 
-    marginBottom: 15, 
-    paddingHorizontal: 15,
+  button: {
+    backgroundColor: '#FFC300',
+    paddingVertical: 15,       
+    borderRadius: 8,           
+    width: '100%',              
+    alignItems: 'center',      
+    marginBottom: 20,          
+  },
+  buttonText: {
     fontSize: 16,
-    color: 'hsla(0, 0%, 20%, 1.00)', 
-  },
-  buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    marginTop: 20,
-  },
-  taskItem: {
-    backgroundColor: "white",
-    padding: 15,
-    marginVertical: 5,
-    borderRadius: 5,
-    borderColor: "#ddd",
-    borderWidth: 1,
-  },
-  description: {
-    color: "#ffc300ff",
-    marginTop: 5,
-  },
-  link: {
-    marginTop: 15,
-    textAlign: "center",
-    color: "#ffc300ff",
-    fontSize: 16,
+    fontWeight: 'bold',
   },
 });

@@ -18,31 +18,46 @@ def get_db():
         db.close()
 
 
+@app.get("/tasks/public", response_model=List[models.Task])
+def get_public_tasks(db: Session = Depends(get_db)):
+    return [
+        models.Task(id=0, title="Bine ați venit! Logați-vă pentru task-uri personale.", description="Task-urile personale sunt protejate.", status="public", owner_id=0)
+    ]
+
 @app.post("/register", response_model=models.User)
 def register_user(user: models.UserCreate, db: Session = Depends(get_db)):
-
-    db_user_by_username = security.get_user(db, username=user.username)
-    if db_user_by_username:
-        raise HTTPException(status_code=400, detail="Username already registered")
+    existing_user = db.query(models.User).filter(
+        models.User.username == user_data.username
+    ).first()
     
-    db_user_by_email = db.query(models.UserDB).filter(models.UserDB.email == user.email).first()
-    if db_user_by_email:
-        raise HTTPException(status_code=400, detail="Email already registered")
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Username-ul este deja folosit")
     
-    hashed_password = security.get_password_hash(user.password)
-    new_user = models.UserDB(
-        username=user.username,
-        hashed_password=hashed_password,
-        email=user.email,
-        nume=user.nume,
-        prenume=user.prenume,
-        telefon=user.telefon
+    existing_email = db.query(models.User).filter(
+        models.User.email == user_data.email
+    ).first()
+    
+    if existing_email:
+        raise HTTPException(status_code=400, detail="Email-ul este deja folosit")
+    
+    new_user = models.User(
+        username=user_data.username,
+        password=hash_password(user_data.password), 
+        email=user_data.email,
+        nume=user_data.nume,
+        prenume=user_data.prenume,
+        telefon=user_data.telefon
     )
+    
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
-    return new_user
-
+    
+    return {
+        "message": "Cont creat cu succes!",
+        "user_id": new_user.id,
+        "username": new_user.username
+    }
 
 @app.post("/login", response_model=models.Token)
 def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):

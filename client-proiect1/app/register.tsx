@@ -23,11 +23,17 @@ export default function RegisterScreen() {
   const router = useRouter(); 
 
   const handleRegister = async () => {
+    
+    
+    console.log('--- Se încearcă înregistrarea... ---');
+
     if (!username || !password || !email || !nume || !prenume) {
       Alert.alert('Eroare', 'Completează toate câmpurile obligatorii (*)');
       return;
     }
+
     try {
+      console.log('Se apelează api.register...');
       
       await api.register({
         username,
@@ -38,26 +44,37 @@ export default function RegisterScreen() {
         telefon
       });
       
+      console.log('SUCCES! api.register a funcționat.');
+      
+     
       Alert.alert(
         'Succes', 
         'Cont creat! Te poți loga acum.',
         [{ text: 'OK', onPress: () => router.back() }]
       );
+
     } catch (error: any) { 
-      console.error(error);
-      const detail = error.detail || 'A apărut o eroare. Încearcă alt username/email.';
+     
+      console.error('A APĂRUT O EROARE LA REGISTER:', error);
+      
+      
+      const detail = error.detail || 'O eroare necunoscută a apărut.';
+      
       Alert.alert('Eroare la înregistrare', detail);
     }
   }; 
+  
 
   return (
     <SafeAreaView style={styles.container}>
+      
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <Text style={styles.title}>Creare Cont Nou</Text>
         
         <TextInput style={styles.input} placeholder="Username*" value={username} onChangeText={setUsername} autoCapitalize="none" placeholderTextColor="#999"/>
         <TextInput style={styles.input} placeholder="Parolă*" value={password} onChangeText={setPassword} secureTextEntry placeholderTextColor="#999"/>
         <TextInput style={styles.input} placeholder="Email*" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" placeholderTextColor="#999"/>
+        
         
         <View style={styles.row}>
           <TextInput style={[styles.input, styles.inputHalf]} placeholder="Nume*" value={nume} onChangeText={setNume} placeholderTextColor="#999"/>
@@ -71,7 +88,7 @@ export default function RegisterScreen() {
         </TouchableOpacity>
         
         <TouchableOpacity style={styles.buttonSecondary} onPress={() => router.back()}>
-          <Text style={styles.buttonSecondaryText}>Înapoi la Login</Text>
+          <Text style={styles.buttonSecondaryText}>Înapoi la pagina principală</Text>
         </TouchableOpacity>
         
       </ScrollView>
@@ -84,7 +101,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#0d2c4f', 
   },
- 
   scrollContainer: {
     flexGrow: 1,
     justifyContent: 'center',
@@ -111,7 +127,6 @@ const styles = StyleSheet.create({
     color: '#333',
     minWidth: 300, 
   },
-  
   row: {
     width: '40%', 
     flexDirection: 'row',
@@ -119,13 +134,11 @@ const styles = StyleSheet.create({
     gap: 10, 
     minWidth: 300,
   },
- 
   inputHalf: {
     flex: 1, 
     width: 'auto', 
     minWidth: 0,
   },
-
   buttonPrimary: {
     width: '40%', 
     backgroundColor: '#FFC300', 
@@ -140,7 +153,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
- 
   buttonSecondary: {
     marginTop: 20,
   },
